@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "../firebase";
 
 export default function HomePage() {
   const [audiobooks, setAudiobooks] = useState([]);
