@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "./firebase";
+import Link from "next/link";
 
 export default function HomePage() {
   const [audiobooks, setAudiobooks] = useState([]);
@@ -10,14 +11,14 @@ export default function HomePage() {
     const fetchAudiobooks = async () => {
       try {
         const q = query(collection(db, "audiobooks"), orderBy("createdAt", "desc"));
-        const querySnapshot = await getDocs(q);
-        const items = querySnapshot.docs.map((doc) => ({
+        const snapshot = await getDocs(q);
+        const items = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         }));
         setAudiobooks(items);
       } catch (error) {
-        console.error("Error fetching audiobooks:", error);
+        console.error("🔥 Error fetching audiobooks:", error);
       }
     };
     fetchAudiobooks();
@@ -25,47 +26,30 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-neutral-950 text-white p-6">
-      <h1 className="text-3xl font-bold mb-8 text-center">
-        📚 My Audiobook Library
-      </h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">🎧 My Audiobooks</h1>
 
-      {audiobooks.length === 0 ? (
-        <p className="text-center text-gray-400">ยังไม่มีหนังสือเสียงในระบบ</p>
-      ) : (
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {audiobooks.map((book) => (
-            <div
-              key={book.id}
-              className="bg-neutral-900 rounded-2xl p-4 flex flex-col items-center shadow-lg hover:scale-105 transition-transform"
-            >
-              {book.coverPreview ? (
-                <img
-                  src={book.coverPreview}
-                  alt={book.title}
-                  className="w-40 h-40 object-cover rounded-xl mb-4"
-                />
-              ) : (
-                <div className="w-40 h-40 bg-neutral-800 flex items-center justify-center text-gray-500 rounded-xl mb-4">
-                  No Cover
-                </div>
-              )}
-
-              <h2 className="text-lg font-semibold text-center mb-3">
-                {book.title}
-              </h2>
-
-              {book.audioURL && (
-                <a
-                  href={`/player/${book.id}`}
-                  className="mt-3 inline-block bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg"
-                >
-                  🎧 Listen
-                </a>
-              )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {audiobooks.length > 0 ? (
+          audiobooks.map(book => (
+            <div key={book.id} className="bg-neutral-900 p-4 rounded-xl hover:bg-neutral-800 transition-all">
+              <img
+                src={book.coverPreview || "/default-cover.png"}
+                alt={book.title}
+                className="w-full h-48 object-cover rounded-lg mb-3"
+              />
+              <h2 className="text-lg font-semibold mb-2">{book.title}</h2>
+              <Link
+                href={`/player/${book.id}`}
+                className="text-green-400 hover:underline"
+              >
+                ▶️ Listen
+              </Link>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <p className="text-center text-gray-400">ยังไม่มีหนังสือเสียง</p>
+        )}
+      </div>
     </main>
   );
 }

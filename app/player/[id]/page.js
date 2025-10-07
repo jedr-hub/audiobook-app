@@ -14,6 +14,7 @@ export default function PlayerPage() {
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolume] = useState(1); // ✅ ระดับเสียงเริ่มต้น 100%
 
   // ดึงข้อมูล audiobook จาก Firestore
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function PlayerPage() {
   useEffect(() => {
     if (!book?.audioURL) return;
     const audioEl = new Audio(book.audioURL);
+    audioEl.volume = volume;
     setAudio(audioEl);
 
     const updateProgress = () => {
@@ -49,6 +51,14 @@ export default function PlayerPage() {
       setAudio(null);
     };
   }, [book]);
+
+  // ✅ ปุ่มเพิ่ม/ลดเสียง
+  const handleVolumeChange = (delta) => {
+    if (!audio) return;
+    const newVolume = Math.min(Math.max(audio.volume + delta, 0), 1); // จำกัด 0-1
+    audio.volume = newVolume;
+    setVolume(newVolume);
+  };
 
   // ปุ่ม Play / Pause
   const togglePlay = () => {
@@ -119,12 +129,29 @@ export default function PlayerPage() {
           </div>
 
           {/* ปุ่มควบคุม */}
-          <div className="flex justify-center gap-6">
+          <div className="flex justify-center gap-6 mb-4">
             <button
               onClick={togglePlay}
               className="bg-green-600 hover:bg-green-500 px-8 py-3 rounded-xl font-semibold text-lg"
             >
               {isPlaying ? "⏸ Pause" : "▶️ Play"}
+            </button>
+          </div>
+
+          {/* ✅ ปุ่มลด/เพิ่มเสียง */}
+          <div className="flex justify-center items-center gap-4 mt-2">
+            <button
+              onClick={() => handleVolumeChange(-0.1)}
+              className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-lg"
+            >
+              🔉 ลดเสียง
+            </button>
+            <span className="text-sm text-gray-400">{Math.round(volume * 100)}%</span>
+            <button
+              onClick={() => handleVolumeChange(0.1)}
+              className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-lg"
+            >
+              🔊 เพิ่มเสียง
             </button>
           </div>
         </div>

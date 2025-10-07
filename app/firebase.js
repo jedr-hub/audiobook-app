@@ -1,7 +1,7 @@
 // app/firebase.js
 import { initializeApp } from "firebase/app";
-import { getStorage } from "firebase/storage";
-import { getFirestore } from "firebase/firestore"; 
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getStorage, connectStorageEmulator } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAqebH599Iqjt9MOUpSKgq15pLjLt5Omzg",
@@ -14,5 +14,16 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const storage = getStorage(app);
-export const db = getFirestore(app); 
+
+// ✅ ต้องใช้ getFirestore(app)
+const db = getFirestore(app);
+const storage = getStorage(app);
+
+// ✅ ถ้ารันใน localhost → เชื่อม Emulator
+if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+  console.log("✅ Connected to Firebase Emulator");
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
+}
+
+export { app, db, storage };
